@@ -73,4 +73,14 @@ public class IOUtils {
         }
         return unzipPath.toFile();
     }
+
+    public static File createDirectoryFromFile(final File file, final Path workDir) throws IOException {
+        Objects.requireNonNull(file, "file cannot be null");
+        Objects.requireNonNull(workDir, "workDir cannot be null");
+        final Path unzipPath = workDir.resolve(getNameWithoutExtension(file));
+        if (!Files.exists(unzipPath)) {
+            Files.createDirectories(unzipPath);
+        }
+        return unzipPath.toFile();
+    }
 }

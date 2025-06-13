@@ -62,7 +62,12 @@ public class TarballCodec implements CodecHandler {
      */
     @Override
     public File decompress(final File file) throws IOException {
-        File parent = IOUtils.createDirectoryFromFile(file);
+        return decompress(file, file.getParentFile().toPath());
+    }
+
+    @Override
+    public File decompress(final File file, final Path workDir) throws IOException {
+        File parent = IOUtils.createDirectoryFromFile(file, workDir);
         try (TarArchiveInputStream inputStream = new TarArchiveInputStream(
                 new FileInputStream(file))) {
 

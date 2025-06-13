@@ -36,4 +36,8 @@ public interface CodecHandler extends Configurable {
      * @throws IOException if an error occurred while decompressing the file.
      */
     File decompress(final File file) throws IOException;
+
+    default File decompress(final File file, final java.nio.file.Path workDir) throws IOException {
+        return decompress(file);
+    }
 }

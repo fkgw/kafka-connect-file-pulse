@@ -23,6 +23,9 @@ public class LocalFSDirectoryListingConfig extends AbstractConfig {
     private static final String FS_DELETE_COMPRESS_FILES_ENABLE_DOC = "Flag indicating whether compressed file  " +
             "should be deleted after extraction (default false)";
 
+    public static final String FS_COMPRESSION_WORKDIR_PATH_CONFIG = "fs.compression.workdir.path";
+    private static final String FS_COMPRESSION_WORKDIR_PATH_DOC = "The directory used to temporarily decompress files";
+
     public static ConfigDef getConf() {
         return new ConfigDef()
                 .define(
@@ -42,7 +45,13 @@ public class LocalFSDirectoryListingConfig extends AbstractConfig {
                         ConfigDef.Type.BOOLEAN,
                         false,
                         ConfigDef.Importance.MEDIUM,
-                        FS_DELETE_COMPRESS_FILES_ENABLE_DOC);
+                        FS_DELETE_COMPRESS_FILES_ENABLE_DOC)
+                .define(
+                        FS_COMPRESSION_WORKDIR_PATH_CONFIG,
+                        ConfigDef.Type.STRING,
+                        System.getProperty("java.io.tmpdir"),
+                        ConfigDef.Importance.MEDIUM,
+                        FS_COMPRESSION_WORKDIR_PATH_DOC);
     }
 
     /**
@@ -63,5 +72,9 @@ public class LocalFSDirectoryListingConfig extends AbstractConfig {
 
     public boolean isDeleteCompressFileEnable() {
         return getBoolean(FS_DELETE_COMPRESS_FILES_ENABLED_CONFIG);
+    }
+
+    public String compressionWorkDirPath() {
+        return getString(FS_COMPRESSION_WORKDIR_PATH_CONFIG);
     }
 }
