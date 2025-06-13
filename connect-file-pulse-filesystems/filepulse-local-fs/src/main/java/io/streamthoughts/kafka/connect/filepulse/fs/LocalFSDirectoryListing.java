@@ -118,6 +118,21 @@ public class LocalFSDirectoryListing implements FileSystemListing<LocalFileStora
         if (config.isRecursiveScanEnable() && !directories.isEmpty()) {
             listingLocalFiles.addAll(scanRecursiveDirectories(directories, decompressedDirs));
         }
+        for (Path dir : decompressedDirs) {
+            try {
+                Files.walk(dir)
+                        .sorted(java.util.Comparator.reverseOrder())
+                        .forEach(p -> {
+                            try {
+                                Files.deleteIfExists(p);
+                            } catch (IOException e) {
+                                LOG.warn("Error while cleaning temporary directory '{}': {}", p, e.getMessage());
+                            }
+                        });
+            } catch (IOException e) {
+                LOG.warn("Error while cleaning temporary directory '{}': {}", dir, e.getMessage());
+            }
+        }
         return listingLocalFiles;
     }
 
@@ -166,7 +181,8 @@ public class LocalFSDirectoryListing implements FileSystemListing<LocalFileStora
                     if (codec != null) {
                         LOG.debug("Detecting compressed file : {}", file.getCanonicalPath());
                         try {
-                            final Path decompressed = codec.decompress(file).toPath();
+                            final Path workDir = Path.of(config.compressionWorkDirPath());
+                            final Path decompressed = codec.decompress(file, workDir).toPath();
                             listingLocalFiles.addAll(listEligibleFiles(decompressed));
                             decompressedDirs.add(decompressed);
                             LOG.debug("Compressed file extracted successfully : {}", path);

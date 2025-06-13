@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -63,8 +64,13 @@ public class GZipCodec implements CodecHandler {
      */
     @Override
     public File decompress(final File file) throws IOException {
+        return decompress(file, file.getParentFile().toPath());
+    }
 
-        File parent = IOUtils.createDirectoryFromFile(file);
+    @Override
+    public File decompress(final File file, final Path workDir) throws IOException {
+
+        File parent = IOUtils.createDirectoryFromFile(file, workDir);
         try (final GZIPInputStream inputStream = new GZIPInputStream(new FileInputStream(file))) {
             CodecHandlerUtils.decompress(
                     inputStream,
@@ -73,7 +79,6 @@ public class GZipCodec implements CodecHandler {
         } catch (IOException e) {
             LOG.error("Error while extracting file {}", file.getName(), e);
         }
-
         return parent;
     }
 }

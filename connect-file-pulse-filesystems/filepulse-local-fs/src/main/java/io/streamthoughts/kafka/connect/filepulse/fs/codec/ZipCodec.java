@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -65,7 +66,12 @@ public class ZipCodec implements CodecHandler {
      */
     @Override
     public File decompress(final File file) throws IOException {
-        File parent = IOUtils.createDirectoryFromFile(file);
+        return decompress(file, file.getParentFile().toPath());
+    }
+
+    @Override
+    public File decompress(final File file, final Path workDir) throws IOException {
+        File parent = IOUtils.createDirectoryFromFile(file, workDir);
         try (ZipInputStream inputStream = new ZipInputStream(new FileInputStream(file))) {
             ZipEntry zipEntry;
             String entryName;
