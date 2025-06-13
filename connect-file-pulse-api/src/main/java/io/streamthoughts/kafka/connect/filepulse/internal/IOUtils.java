@@ -65,9 +65,28 @@ public class IOUtils {
         return (dotIndex == -1) ? filename : filename.substring(0, dotIndex);
     }
 
+    private static String workingDirectory;
+
+    public static void setWorkingDirectory(final String dir) {
+        workingDirectory = dir;
+    }
+
+    public static String getWorkingDirectory() {
+        return workingDirectory;
+    }
+
     public static File createDirectoryFromFile(final File file) throws IOException {
+        return createDirectoryFromFile(file, workingDirectory);
+    }
+
+    public static File createDirectoryFromFile(final File file, final String workDir) throws IOException {
         Objects.requireNonNull(file, "file cannot be null");
-        final Path unzipPath = Paths.get(file.getParentFile().getCanonicalPath(), getNameWithoutExtension(file));
+        final Path unzipPath;
+        if (workDir != null && !workDir.isEmpty()) {
+            unzipPath = Paths.get(workDir, getNameWithoutExtension(file));
+        } else {
+            unzipPath = Paths.get(file.getParentFile().getCanonicalPath(), getNameWithoutExtension(file));
+        }
         if (!Files.exists(unzipPath)) {
             Files.createDirectories(unzipPath);
         }
