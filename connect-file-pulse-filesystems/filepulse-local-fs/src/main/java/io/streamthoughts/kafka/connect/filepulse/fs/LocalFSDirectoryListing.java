@@ -9,6 +9,7 @@ package io.streamthoughts.kafka.connect.filepulse.fs;
 import io.streamthoughts.kafka.connect.filepulse.errors.ConnectFilePulseException;
 import io.streamthoughts.kafka.connect.filepulse.fs.codec.CodecHandler;
 import io.streamthoughts.kafka.connect.filepulse.fs.codec.CodecManager;
+import io.streamthoughts.kafka.connect.filepulse.internal.IOUtils;
 import io.streamthoughts.kafka.connect.filepulse.source.FileObjectMeta;
 import io.streamthoughts.kafka.connect.filepulse.source.LocalFileObjectMeta;
 import java.io.File;
@@ -24,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.commons.io.FileUtils;
 import org.apache.kafka.connect.errors.ConnectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +68,7 @@ public class LocalFSDirectoryListing implements FileSystemListing<LocalFileStora
     @Override
     public void configure(final Map<String, ?> configs) {
         config = new LocalFSDirectoryListingConfig(configs);
+        IOUtils.setWorkingDirectory(config.decompressWorkingDirectory());
     }
 
     /**
@@ -118,6 +121,7 @@ public class LocalFSDirectoryListing implements FileSystemListing<LocalFileStora
         if (config.isRecursiveScanEnable() && !directories.isEmpty()) {
             listingLocalFiles.addAll(scanRecursiveDirectories(directories, decompressedDirs));
         }
+        cleanupDecompressedDirectories(decompressedDirs);
         return listingLocalFiles;
     }
 
@@ -209,6 +213,19 @@ public class LocalFSDirectoryListing implements FileSystemListing<LocalFileStora
                 .filter(f -> !decompressedDirs.contains(f))
                 .flatMap(f -> listEligibleFiles(f).stream())
                 .collect(Collectors.toList());
+    }
+
+    private void cleanupDecompressedDirectories(List<Path> decompressedDirs) {
+        String workDir = config.decompressWorkingDirectory();
+        if (workDir != null && !workDir.isEmpty()) {
+            for (Path dir : decompressedDirs) {
+                try {
+                    FileUtils.deleteDirectory(dir.toFile());
+                } catch (IOException e) {
+                    LOG.warn("Error while deleting working directory '{}': {}", dir, e.getMessage());
+                }
+            }
+        }
     }
 
     /**

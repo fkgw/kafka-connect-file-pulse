@@ -23,6 +23,11 @@ public class LocalFSDirectoryListingConfig extends AbstractConfig {
     private static final String FS_DELETE_COMPRESS_FILES_ENABLE_DOC = "Flag indicating whether compressed file  " +
             "should be deleted after extraction (default false)";
 
+    public static final String FS_DECOMPRESS_WORKING_DIR_CONFIG = "fs.decompress.working.dir";
+    private static final String FS_DECOMPRESS_WORKING_DIR_DOC =
+            "Directory where compressed files are decompressed before processing. " +
+            "If not set, files are decompressed next to the source file.";
+
     public static ConfigDef getConf() {
         return new ConfigDef()
                 .define(
@@ -42,7 +47,13 @@ public class LocalFSDirectoryListingConfig extends AbstractConfig {
                         ConfigDef.Type.BOOLEAN,
                         false,
                         ConfigDef.Importance.MEDIUM,
-                        FS_DELETE_COMPRESS_FILES_ENABLE_DOC);
+                        FS_DELETE_COMPRESS_FILES_ENABLE_DOC)
+                .define(
+                        FS_DECOMPRESS_WORKING_DIR_CONFIG,
+                        ConfigDef.Type.STRING,
+                        null,
+                        ConfigDef.Importance.MEDIUM,
+                        FS_DECOMPRESS_WORKING_DIR_DOC);
     }
 
     /**
@@ -63,5 +74,9 @@ public class LocalFSDirectoryListingConfig extends AbstractConfig {
 
     public boolean isDeleteCompressFileEnable() {
         return getBoolean(FS_DELETE_COMPRESS_FILES_ENABLED_CONFIG);
+    }
+
+    public String decompressWorkingDirectory() {
+        return getString(FS_DECOMPRESS_WORKING_DIR_CONFIG);
     }
 }
